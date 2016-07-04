@@ -20,6 +20,8 @@ Among other tools.
 
 [**OpenCV**](http://opencv.org/) Version 2.4.8.2 included in NVIDIA CodeWorks for Android.
 
-[**OpenCV Manager**] is required. Latest version can be downloaded via Google Play.
+[**OpenCV Manager**](https://play.google.com/store/apps/details?id=org.opencv.engine&hl=es_419) is required. Latest version can be downloaded via Google Play.
 
 -----
+## Description
+This application detects corners in floor plans using OpenCV. TODO: Explain algorithm.
