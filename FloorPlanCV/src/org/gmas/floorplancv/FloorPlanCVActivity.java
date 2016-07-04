@@ -130,7 +130,7 @@ public class FloorPlanCVActivity extends Activity implements CvCameraViewListene
         mGray = new Mat(height, width, CvType.CV_8UC1);
         mThresh = new Mat(height, width, CvType.CV_8UC1);
         mAux = new Mat(height, width, CvType.CV_8UC4);
-        //mLines = new Mat(height, width, CvType.CV_8UC1);
+        mLines = new Mat(height, width, CvType.CV_8UC2);
         mCorners = new Mat(height, width, CvType.CV_8UC1);
     }
 
@@ -140,7 +140,7 @@ public class FloorPlanCVActivity extends Activity implements CvCameraViewListene
         mGray.release();
         mThresh.release();
         mAux.release();
-        //mLines.release();
+        mLines.release();
         mCorners.release();
     }
     
@@ -154,14 +154,15 @@ public class FloorPlanCVActivity extends Activity implements CvCameraViewListene
             mRgba = inputFrame.rgba();
             break;
         case VIEW_MODE_THRESH:
-            // Threshold.
+            // Threshold Mode. Uses an adaptative threshold.
             mGray = inputFrame.gray();
             // Threshold value at 110 looked the best so far.
-            Imgproc.threshold(mGray, mThresh, 110, 255, Imgproc.THRESH_BINARY);
+            Imgproc.adaptiveThreshold(mGray, mThresh, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 11, 3);
+            Imgproc.erode(mThresh, mThresh, new Mat());
             Imgproc.cvtColor(mThresh, mRgba, Imgproc.COLOR_GRAY2RGBA, 4);
             break;
         case VIEW_MODE_CANNY:
-            // Canny Filter.
+            // Canny Filter for edge detection
             mRgba = inputFrame.rgba();
             mGray = inputFrame.gray();
             Imgproc.Canny(mGray, mAux, 80, 100);
@@ -171,27 +172,36 @@ public class FloorPlanCVActivity extends Activity implements CvCameraViewListene
             // HoughLines applied to the Threshold Filtered Image
         	mRgba = inputFrame.rgba();
             mGray = inputFrame.gray();
-            //Imgproc.threshold(mGray, mThresh, 110, 255, Imgproc.THRESH_BINARY);
-            Imgproc.Canny(mGray, mThresh, 80, 100);
-            Imgproc.HoughLines(mThresh, mLines = new Mat(), 1, Math.PI/180, 10);
-            Log.i(TAG, "Rows = "+mLines.rows()+" Cols = "+mLines.cols());
-            mLines.release();
-        	
-            Imgproc.cvtColor(mThresh, mRgba, Imgproc.COLOR_GRAY2BGRA);
+            Imgproc.adaptiveThreshold(mGray, mThresh, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 11, 3);
+            Imgproc.HoughLinesP(mThresh, mLines, 5, 5*Math.PI/180, 120, 20, 0);
+            Log.i(TAG, "Rows: "+mLines.rows()+" Cols: "+mLines.cols());
             
-            /*
             for(int i=0; i<mLines.cols(); i++) {
-            	double[] vec = mLines.get(0, i);
-            	Point[] points = new Point[2];
-            	points[0] = new Point(vec[0], vec[1]);
-            	points[1] = new Point(vec[2], vec[3]);
-            	Core.line(mRgba, points[0], points[1], new Scalar(0,255, 0, 255),2);
+            	double[] lines = mLines.get(0, i);
+            	Point lineStart = new Point(lines[0],lines[1]); 
+            	Point lineEnd = new Point(lines[2],lines[3]); 
+            	Core.line(mRgba, lineStart, lineEnd, new Scalar(255,0,0,255), 1);
             }
-            */
-            break;
+            mLines.release();
+        	break;
+        	
         case VIEW_MODE_CORNERS:
-            // input frame has RBGA format
-            mRgba = inputFrame.rgba();
+            // Same as the Line Mode, but drawing the end points of the lines
+        	mRgba = inputFrame.rgba();
+            mGray = inputFrame.gray();
+            Imgproc.adaptiveThreshold(mGray, mThresh, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 11, 3);
+            Imgproc.HoughLinesP(mThresh, mLines, 5, 5*Math.PI/180, 120, 20, 0);
+            Log.i(TAG, "Rows: "+mLines.rows()+" Cols: "+mLines.cols());
+            
+            for(int i=0; i<mLines.cols(); i++) {
+            	double[] lines = mLines.get(0, i);
+            	Point lineStart = new Point(lines[0],lines[1]); 
+            	Point lineEnd = new Point(lines[2],lines[3]); 
+            	Log.i(TAG, "(" + lineStart.x + "," + lineStart.y + "),(" + lineEnd.x + "," + lineEnd.y + ")");
+            	Core.circle(mRgba, lineStart, 5, new Scalar(255,0,0,255), 1);
+            	Core.circle(mRgba, lineEnd, 5, new Scalar(255,0,0,255), 1);
+            }
+            mLines.release();
             break;
         }
 
@@ -213,9 +223,6 @@ public class FloorPlanCVActivity extends Activity implements CvCameraViewListene
         } else if (item == mItemPreviewCorners) {
         	mViewMode = VIEW_MODE_CORNERS;
         }
-
         return true;
     }
-
-    //public native void FindFeatures(long matAddrGr, long matAddrRgba);
 }
