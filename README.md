@@ -34,7 +34,9 @@ The application starts with the camera. For debug purposes, different menus are 
 - The Corners Menu is the same as the Lines, except that only the lines' end points are drawn. Ideally, There should be only one line estimated for each wall, and this line's end points would be the corners of the walls.
 
 ## Further investigation
-To make this method more robust, the [https://en.wikipedia.org/wiki/Topological_skeleton](Morphological Skeleton) approach could work very well. An interesting method could be, for example, [https://github.com/bsdnoobz/zhang-suen-thinning](Zhang-Suen).
+To make this method more robust, the [Morphological Skeleton](https://en.wikipedia.org/wiki/Topological_skeleton) approach could work very well. An interesting method could be, for example, [Zhang-Suen](https://github.com/bsdnoobz/zhang-suen-thinning).
 
 -----
 ## Example Images
+
+<img src="https://cloud.githubusercontent.com/assets/14120807/16566970/dce74aa0-41ef-11e6-84aa-839e6be59a96.png" width="45%"></img> <img src="https://cloud.githubusercontent.com/assets/14120807/16566971/dd1903ce-41ef-11e6-9a91-87a6c02ca653.png" width="45%"></img> <img src="https://cloud.githubusercontent.com/assets/14120807/16566972/dd30dbd4-41ef-11e6-9b95-21ba822ee1a2.png" width="45%"></img> <img src="https://cloud.githubusercontent.com/assets/14120807/16566973/dd38ce20-41ef-11e6-9d46-858c6fdc6a8c.png" width="45%"></img> 
